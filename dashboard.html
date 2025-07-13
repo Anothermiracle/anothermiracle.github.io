@@ -131,6 +131,107 @@
       border-radius: 0.375rem; /* rounded-md */
       min-height: 200px; /* Minimum height for the editor */
     }
+
+    /* Script Hub specific styles */
+    .script-card {
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, opacity 0.5s ease-out, transform 0.5s ease-out;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .script-card.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .script-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Skeleton Loader */
+    .skeleton-card {
+      background: #1F2937;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #374151;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    .skeleton-image {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(90deg, #374151 25%, #4B5563 50%, #374151 75%);
+      background-size: 200% 100%;
+      animation: loading-gradient 1.5s infinite;
+    }
+
+    .skeleton-content {
+      padding: 18px;
+    }
+
+    .skeleton-title, .skeleton-info, .skeleton-button {
+      background: #374151;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .skeleton-title {
+      height: 24px;
+      width: 80%;
+    }
+
+    .skeleton-info {
+      height: 18px;
+      width: 60%;
+    }
+
+    .skeleton-button {
+      height: 44px;
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.8; }
+      50% { opacity: 1; }
+      100% { opacity: 0.8; }
+    }
+
+    @keyframes loading-gradient {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Notification */
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #10B981;
+      color: #1F2937;
+      padding: 15px 25px;
+      border-radius: 8px;
+      display: none;
+      border: 1px solid #374151;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+      z-index: 1000;
+    }
+
+    .notification.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .notification.error {
+      background: #EF4444;
+      color: #F9FAFB;
+    }
   </style>
 </head>
 <body class="bg-gray-900 text-white font-sans flex h-screen overflow-hidden">
@@ -581,45 +682,50 @@
 </div>
 
     <!-- Script Hub Content -->
-    <div id="scriptHubContent" class="hidden max-w-5xl mx-auto">
-      <header class="mb-8">
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-200 leading-tight">Script Hub</h1>
-        <p class="text-gray-500 mt-1 text-sm sm:text-base">Explore and manage your scripts</p>
-      </header>
+    <div id="scriptHubContent" class="hidden">
+      <div class="max-w-6xl mx-auto">
+        <header class="mb-8 flex flex-wrap justify-between items-center gap-4">
+          <div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white leading-tight">Celestial Script Hub</h1>
+            <p class="text-gray-400 mt-1 text-sm sm:text-base">Discover and execute powerful scripts</p>
+          </div>
+          <div class="flex flex-wrap gap-3 items-center">
+            <select id="apiSelector" class="px-4 py-2 bg-gray-800 border border-gray-600 text-gray-200 rounded-lg focus:border-blue-400 focus:outline-none transition">
+              <option value="scriptblox">ScriptBlox</option>
+              <option value="rscripts">RScripts.net</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="Search scripts..." 
+                   class="px-4 py-2 bg-gray-800 border border-gray-600 text-gray-200 rounded-lg focus:border-blue-400 focus:outline-none transition w-64" />
+            <button id="searchButton" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition">
+              Search
+            </button>
+          </div>
+        </header>
 
-      <!-- Search and Filters -->
-      <div class="mb-8 bg-gray-800 rounded-lg p-6 shadow-lg">
-        <div class="relative mb-4">
-          <input type="text" id="scriptSearchInput" placeholder="Search for scripts..." 
-                 class="w-full rounded-md px-4 py-2 pl-10 bg-gray-900 border border-gray-700 focus:border-gray-400 focus:outline-none text-gray-300 transition" />
-          <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
+        <!-- Scripts Grid -->
+        <div id="scriptsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <!-- Scripts will be loaded here -->
         </div>
-        <div id="scriptFilterButtons" class="flex flex-wrap gap-2">
-          <button class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-md text-sm font-semibold transition" data-filter="all">All</button>
-          <button class="px-4 py-2 bg-gray-900 hover:bg-gray-700 text-gray-400 rounded-md text-sm font-semibold transition" data-filter="combat">Combat</button>
-          <button class="px-4 py-2 bg-gray-900 hover:bg-gray-700 text-gray-400 rounded-md text-sm font-semibold transition" data-filter="utility">Utility</button>
-          <button class="px-4 py-2 bg-gray-900 hover:bg-gray-700 text-gray-400 rounded-md text-sm font-semibold transition" data-filter="exploit">Exploit</button>
-          <button class="px-4 py-2 bg-gray-900 hover:bg-gray-700 text-gray-400 rounded-md text-sm font-semibold transition" data-filter="fun">Fun</button>
-          <button class="px-4 py-2 bg-gray-900 hover:bg-gray-700 text-gray-400 rounded-md text-sm font-semibold transition" data-filter="misc">Misc</button>
-        </div>
-      </div>
-
-      <!-- Script Cards Grid -->
-      <div id="scriptCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <!-- Script cards will be dynamically loaded here -->
-        <p class="text-gray-400 text-center col-span-full">Loading scripts...</p>
-      </div>
-
-      <!-- Pagination -->
-      <div id="scriptPagination" class="flex justify-center items-center gap-2 text-gray-400 mb-8">
-        <!-- Pagination buttons will be dynamically loaded here -->
       </div>
     </div>
 
-</div>
-</main>
+  </main>
+
+  <!-- Notification -->
+  <div class="notification" id="notification"></div>
+
+  <!-- Script Details Modal -->
+  <div id="scriptModal" class="modal-overlay">
+    <div class="modal-content max-w-2xl">
+      <span class="close-button absolute top-4 right-6 text-2xl cursor-pointer text-gray-400 hover:text-white" onclick="closeModal()">&times;</span>
+      <h2 class="text-2xl font-bold text-white mb-4" id="modalScriptTitle"></h2>
+      <img src="/placeholder.svg" alt="Script Image" class="w-full h-48 object-cover rounded-lg mb-4" id="modalScriptImage">
+      <p class="text-gray-300 mb-2" id="modalScriptGame"></p>
+      <p class="text-gray-300 mb-2" id="modalScriptViews"></p>
+      <p class="text-gray-300 mb-4" id="modalScriptDescription"></p>
+      <button class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition" id="modalCopyButton">Copy Script</button>
+    </div>
+  </div>
 
   <!-- Add Game Modal -->
   <div id="addGameModal" class="modal-overlay hidden">
@@ -669,26 +775,9 @@
       <div class="flex justify-end gap-3 mt-6">
         <button id="cancelManageGameBtn" class="px-5 py-2 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-md transition">
           Cancel
-
         </button>
         <button id="saveGameChangesBtn" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition">
           Save Changes
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- View Script Modal -->
-  <div id="viewScriptModal" class="modal-overlay hidden">
-    <div class="modal-content max-w-2xl">
-      <h2 id="viewScriptTitle" class="text-xl font-semibold text-white mb-4"></h2>
-      <textarea id="viewScriptContent" class="code-editor-textarea w-full h-96 mb-4" readonly></textarea>
-      <div class="flex justify-end gap-3">
-        <button id="closeViewScriptBtn" class="px-5 py-2 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-md transition">
-          Close
-        </button>
-        <button id="copyScriptContentBtn" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition">
-          Copy Script
         </button>
       </div>
     </div>
@@ -780,6 +869,334 @@
         showContent('scriptHubContent');
       });
 
+      // --- Script Hub Logic (Enhanced from Infernium Script Hub) ---
+      let scriptsData = [];
+      const proxies = [
+        'https://cors-anywhere.herokuapp.com/',
+        'https://api.codetabs.com/v1/proxy/?quest=',
+        'https://thingproxy.freeboard.io/fetch/'
+      ];
+      let currentProxy = 0;
+      let currentScriptToCopy = '';
+
+      // Utility function for debouncing search input
+      function debounce(func, delay) {
+        let timeout;
+        return function(...args) {
+          const context = this;
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(context, args), delay);
+        };
+      }
+
+      async function fetchWithRetry(url, retries = 3) {
+        try {
+          const proxyUrl = proxies[currentProxy] + encodeURIComponent(url);
+          const response = await fetch(proxyUrl);
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error ${response.status}: ${errorText.substring(0, 200)}...`);
+          }
+
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            return await response.json();
+          } else {
+            return await response.text();
+          }
+        } catch (error) {
+          console.error(`Fetch failed for ${url} with proxy ${proxies[currentProxy]}:`, error);
+          if (retries > 0) {
+            currentProxy = (currentProxy + 1) % proxies.length;
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return fetchWithRetry(url, retries - 1);
+          }
+          throw error;
+        }
+      }
+
+      function renderSkeletons(count) {
+        const container = document.getElementById('scriptsContainer');
+        let html = '';
+        for (let i = 0; i < count; i++) {
+          html += `
+            <div class="skeleton-card">
+              <div class="skeleton-image"></div>
+              <div class="skeleton-content">
+                <div class="skeleton-title"></div>
+                <div class="skeleton-info" style="width: 70%;"></div>
+                <div class="skeleton-info" style="width: 50%;"></div>
+                <div class="skeleton-button"></div>
+              </div>
+            </div>
+          `;
+        }
+        container.innerHTML = html;
+      }
+
+      async function loadScripts(search = '') {
+        const container = document.getElementById('scriptsContainer');
+        renderSkeletons(6);
+
+        const apiSource = document.getElementById('apiSelector').value;
+        let rawScripts = [];
+
+        try {
+          if (apiSource === 'scriptblox') {
+            const apiUrl = search
+              ? `https://scriptblox.com/api/script/search?q=${encodeURIComponent(search)}`
+              : 'https://scriptblox.com/api/script/fetch';
+            const data = await fetchWithRetry(apiUrl);
+            rawScripts = data.result?.scripts || [];
+
+            scriptsData = rawScripts.map(script => ({
+              title: script.title,
+              game: script.game?.name || 'N/A',
+              views: script.views?.toLocaleString() || 'N/A',
+              image: script.image ? (script.image.startsWith('http') ? script.image : `https://scriptblox.com${script.image}`) : '/placeholder.svg?height=180&width=300',
+              description: script.description || 'No description available.',
+              scriptContent: script.script
+            }));
+
+          } else if (apiSource === 'rscripts') {
+            const apiUrl = `https://rscripts.net/api/v2/scripts?page=1&orderBy=date&sort=desc`;
+            const data = await fetchWithRetry(apiUrl);
+            rawScripts = data.scripts || [];
+
+            const filteredScripts = search
+              ? rawScripts.filter(script => script.title.toLowerCase().includes(search.toLowerCase()))
+              : rawScripts;
+
+            scriptsData = filteredScripts.map(script => {
+              const hasUser = script.user;
+              const profilePicture = (hasUser && script.user.image) ? script.user.image : "https://i.pravatar.cc/300";
+              const username = hasUser ? script.user.username : script.creator;
+
+              return {
+                title: script.title,
+                game: script.game || 'N/A',
+                views: script.views?.toLocaleString() || 'N/A',
+                image: script.image || '/placeholder.svg?height=180&width=300',
+                description: script.description || 'No description available.',
+                scriptContent: null,
+                rawScriptUrl: script.rawScript,
+                creator: username,
+                creatorImage: profilePicture
+              };
+            });
+          }
+
+          let html = '';
+          if (scriptsData.length === 0) {
+            html = '<p class="text-gray-400 text-center col-span-full py-12">No scripts found. Try a different search term or API source.</p>';
+          } else {
+            scriptsData.forEach((script, index) => {
+              html += `
+                <div class="script-card bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-700" data-index="${index}">
+                  <img
+                    src="${script.image}"
+                    class="w-full h-48 object-cover"
+                    onerror="this.src='/placeholder.svg?height=180&width=300'"
+                  >
+                  <div class="p-4">
+                    <h3 class="text-lg font-semibold text-white mb-2">${script.title}</h3>
+                    <p class="text-gray-400 text-sm mb-1">Game: ${script.game}</p>
+                    <p class="text-gray-400 text-sm mb-3">Views: ${script.views}</p>
+                    ${apiSource === 'rscripts' && script.creator ? `<p class="text-gray-400 text-sm mb-3">Creator: ${script.creator}</p>` : ''}
+                    <button class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition copy-script-btn" data-index="${index}">
+                      Copy Script
+                    </button>
+                  </div>
+                </div>
+              `;
+            });
+          }
+
+          container.innerHTML = html;
+          
+          // Animate cards in
+          document.querySelectorAll('.script-card').forEach((card, i) => {
+            setTimeout(() => {
+              card.classList.add('show');
+            }, i * 100);
+            
+            card.addEventListener('click', (event) => {
+              if (!event.target.closest('.copy-script-btn')) {
+                openModal(card.dataset.index);
+              }
+            });
+          });
+
+          // Add event listeners for copy buttons
+          document.querySelectorAll('.copy-script-btn').forEach(button => {
+            button.addEventListener('click', async (event) => {
+              event.stopPropagation();
+              const index = button.dataset.index;
+              const script = scriptsData[index];
+              
+              if (apiSource === 'rscripts' && script.rawScriptUrl && !script.scriptContent) {
+                button.textContent = 'Fetching...';
+                button.disabled = true;
+                try {
+                  const scriptCode = await fetchWithRetry(script.rawScriptUrl);
+                  script.scriptContent = scriptCode;
+                  copyScriptToClipboard(scriptCode, button);
+                } catch (e) {
+                  console.error("Error fetching raw script:", e);
+                  showMessage('Failed to fetch script content.', true);
+                } finally {
+                  button.textContent = 'Copy Script';
+                  button.disabled = false;
+                }
+              } else {
+                copyScriptToClipboard(script.scriptContent, button);
+              }
+            });
+          });
+
+        } catch (error) {
+          showMessage(`Failed to load scripts from ${apiSource}: ${error.message}`, true);
+          container.innerHTML = '<p class="text-red-400 text-center col-span-full py-12">Failed to load scripts. Please check your connection or try again later.</p>';
+        }
+      }
+
+      function copyScriptToClipboard(scriptContent, buttonElement) {
+        if (!scriptContent || scriptContent === 'Failed to fetch script content.') {
+          showMessage('No script content available to copy.', true);
+          return;
+        }
+
+        const textarea = document.createElement('textarea');
+        textarea.value = scriptContent;
+        document.body.appendChild(textarea);
+        textarea.select();
+
+        try {
+          document.execCommand('copy');
+          showMessage('Script copied to clipboard!');
+          if (buttonElement) {
+            const originalText = buttonElement.textContent;
+            buttonElement.textContent = 'Copied!';
+            buttonElement.classList.add('bg-green-600');
+            buttonElement.classList.remove('bg-blue-600');
+            setTimeout(() => {
+              buttonElement.textContent = originalText;
+              buttonElement.classList.remove('bg-green-600');
+              buttonElement.classList.add('bg-blue-600');
+            }, 2000);
+          }
+        } catch (err) {
+          showMessage('Failed to copy script. Please copy manually.', true);
+        } finally {
+          document.body.removeChild(textarea);
+        }
+      }
+
+      function searchScripts() {
+        const searchTerm = document.getElementById('searchInput').value.trim();
+        loadScripts(searchTerm);
+      }
+
+      function showMessage(text, isError = false) {
+        const notif = document.getElementById('notification');
+        notif.textContent = text;
+        notif.classList.remove('error', 'show');
+        if (isError) {
+          notif.classList.add('error');
+        }
+        notif.style.display = 'block';
+        setTimeout(() => {
+          notif.classList.add('show');
+        }, 10);
+
+        setTimeout(() => {
+          notif.classList.remove('show');
+          setTimeout(() => {
+            notif.style.display = 'none';
+          }, 500);
+        }, 3000);
+      }
+
+      // Modal Functions
+      async function openModal(index) {
+        const script = scriptsData[index];
+        if (!script) {
+          showMessage('Script details not found.', true);
+          return;
+        }
+
+        const modal = document.getElementById('scriptModal');
+        const modalTitle = document.getElementById('modalScriptTitle');
+        const modalImage = document.getElementById('modalScriptImage');
+        const modalGame = document.getElementById('modalScriptGame');
+        const modalViews = document.getElementById('modalScriptViews');
+        const modalDescription = document.getElementById('modalScriptDescription');
+        const modalCopyBtn = document.getElementById('modalCopyButton');
+
+        modalTitle.textContent = script.title;
+        modalImage.src = script.image;
+        modalImage.onerror = () => { modalImage.src = '/placeholder.svg?height=250&width=700'; };
+        modalGame.textContent = `Game: ${script.game}`;
+        modalViews.textContent = `Views: ${script.views}`;
+        modalDescription.textContent = script.description;
+
+        // Fetch script content on demand for rscripts.net if not already fetched
+        if (document.getElementById('apiSelector').value === 'rscripts' && script.rawScriptUrl && !script.scriptContent) {
+          modalCopyBtn.textContent = 'Fetching Script...';
+          modalCopyBtn.disabled = true;
+          try {
+            const scriptCode = await fetchWithRetry(script.rawScriptUrl);
+            script.scriptContent = scriptCode;
+            currentScriptToCopy = scriptCode;
+            modalCopyBtn.textContent = 'Copy Script';
+            modalCopyBtn.disabled = false;
+          } catch (e) {
+            console.error("Error fetching raw script:", e);
+            currentScriptToCopy = 'Failed to fetch script content.';
+            modalCopyBtn.textContent = 'Failed to Fetch';
+            modalCopyBtn.disabled = true;
+            showMessage('Failed to fetch script content for RScripts.net. Try again later.', true);
+          }
+        } else {
+          currentScriptToCopy = script.scriptContent;
+          modalCopyBtn.textContent = 'Copy Script';
+          modalCopyBtn.disabled = false;
+        }
+
+        modal.classList.add('visible');
+      }
+
+      function closeModal() {
+        const modal = document.getElementById('scriptModal');
+        modal.classList.remove('visible');
+        currentScriptToCopy = '';
+      }
+
+      // Event listeners for Script Hub
+      document.getElementById('searchInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchScripts();
+      });
+
+      document.getElementById('searchButton').addEventListener('click', searchScripts);
+
+      document.getElementById('apiSelector').addEventListener('change', () => {
+        loadScripts();
+      });
+
+      // Event listener for modal copy button
+      document.getElementById('modalCopyButton').addEventListener('click', (event) => {
+        copyScriptToClipboard(currentScriptToCopy, event.target);
+      });
+
+      // Close modal if clicked outside content
+      document.getElementById('scriptModal').addEventListener('click', (event) => {
+        if (event.target === event.currentTarget) {
+          closeModal();
+        }
+      });
+
+      // Make closeModal globally available
+      window.closeModal = closeModal;
 
       // --- Add Game Modal Logic ---
       const addGameIcon = document.getElementById('addGameIcon');
@@ -828,26 +1245,29 @@
         hideModal();
       });
 
-
       // --- Executor Logic ---
       const scriptEditor = document.getElementById('scriptEditor');
       const consoleOutput = document.getElementById('consoleOutput');
       const runScriptBtn = document.getElementById('runScriptBtn');
       const clearEditorBtn = document.getElementById('clearEditorBtn');
 
-      runScriptBtn.addEventListener('click', () => {
-        const scriptContent = scriptEditor.value;
-        if (scriptContent.trim() === '') {
-          consoleOutput.value += 'Error: No script to execute.\n';
-          return;
-        }
-        consoleOutput.value += `Executing script:\n${scriptContent}\n--- Script End ---\n`;
-      });
+      if (runScriptBtn) {
+        runScriptBtn.addEventListener('click', () => {
+          const scriptContent = scriptEditor.value;
+          if (scriptContent.trim() === '') {
+            consoleOutput.value += 'Error: No script to execute.\n';
+            return;
+          }
+          consoleOutput.value += `Executing script:\n${scriptContent}\n--- Script End ---\n`;
+        });
+      }
 
-      clearEditorBtn.addEventListener('click', () => {
-        scriptEditor.value = '';
-        consoleOutput.value = ''; 
-      });
+      if (clearEditorBtn) {
+        clearEditorBtn.addEventListener('click', () => {
+          scriptEditor.value = '';
+          consoleOutput.value = ''; 
+        });
+      }
 
       // --- Manage Game Modal Logic ---
       const manageGameModal = document.getElementById('manageGameModal');
@@ -962,7 +1382,7 @@
           }
 
           modalGameProfileDisplay.innerHTML = `
-            <img src="${iconUrl || 'https://via.placeholder.com/150/374151/D1D5DB?text=No+Icon'}" alt="${gameName} icon" class="w-16 h-16 rounded-md border-2 border-gray-600">
+            <img src="${iconUrl || '/placeholder.svg?height=64&width=64'}" alt="${gameName} icon" class="w-16 h-16 rounded-md border-2 border-gray-600">
             <div class="flex flex-col">
               <span class="text-white font-semibold text-lg">${gameName}</span>
               <span class="text-gray-400 text-sm">Creator: ${creatorName}</span>
@@ -973,259 +1393,6 @@
           modalGameProfileDisplay.innerHTML = `<p class="text-red-400">Failed to fetch game details: ${error.message}</p>`;
         }
       }
-
-      // --- Script Hub Logic ---
-      const scriptSearchInput = document.getElementById('scriptSearchInput');
-      const scriptFilterButtons = document.getElementById('scriptFilterButtons');
-      const scriptCardsGrid = document.getElementById('scriptCardsGrid');
-      const scriptPagination = document.getElementById('scriptPagination');
-
-      const viewScriptModal = document.getElementById('viewScriptModal');
-      const viewScriptTitle = document.getElementById('viewScriptTitle');
-      const viewScriptContent = document.getElementById('viewScriptContent');
-      const closeViewScriptBtn = document.getElementById('closeViewScriptBtn');
-      const copyScriptContentBtn = document.getElementById('copyScriptContentBtn');
-
-      let currentPage = 1;
-      let currentSearchQuery = '';
-      let currentFilter = 'all';
-
-      const SCRIPTBLOX_API_BASE = 'https://scriptblox.com/api/script/';
-
-      async function fetchScripts(page = 1, limit = 9) {
-        scriptCardsGrid.innerHTML = '<p class="text-gray-400 text-center col-span-full">Loading scripts...</p>';
-        scriptPagination.innerHTML = '';
-        try {
-          const response = await fetch(`${SCRIPTBLOX_API_BASE}latest?page=${page}&limit=${limit}`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          displayScripts(data.result.scripts, data.result.totalPages, page);
-        } catch (error) {
-          console.error('Error fetching scripts:', error);
-          scriptCardsGrid.innerHTML = `<p class="text-red-400 text-center col-span-full">Failed to load scripts: ${error.message}</p>`;
-        }
-      }
-
-      async function searchScripts(query, page = 1, limit = 9) {
-        scriptCardsGrid.innerHTML = '<p class="text-gray-400 text-center col-span-full">Searching scripts...</p>';
-        scriptPagination.innerHTML = '';
-        try {
-          const response = await fetch(`${SCRIPTBLOX_API_BASE}search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          displayScripts(data.result.scripts, data.result.totalPages, page);
-        } catch (error) {
-          console.error('Error searching scripts:', error);
-          scriptCardsGrid.innerHTML = `<p class="text-red-400 text-center col-span-full">Failed to search scripts: ${error.message}</p>`;
-        }
-      }
-
-      async function fetchScriptDetails(scriptId) {
-        try {
-          const response = await fetch(`${SCRIPTBLOX_API_BASE}get-script?id=${scriptId}`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          return data.result;
-        } catch (error) {
-          console.error('Error fetching script details:', error);
-          return null;
-        }
-      }
-
-      function displayScripts(scripts, totalPages, currentPage) {
-        scriptCardsGrid.innerHTML = '';
-        if (scripts.length === 0) {
-          scriptCardsGrid.innerHTML = '<p class="text-gray-400 text-center col-span-full">No scripts found.</p>';
-          return;
-        }
-
-        scripts.forEach(script => {
-          const scriptCard = document.createElement('div');
-          scriptCard.className = 'bg-gray-800 rounded-lg shadow-lg overflow-hidden';
-          scriptCard.innerHTML = `
-            <img src="${script.image || 'https://via.placeholder.com/400x225/1F2937/D1D5DB?text=Script+Icon'}" alt="Script Icon" class="w-full h-40 object-cover">
-            <div class="p-4">
-              <h3 class="text-lg font-semibold text-white mb-1">${script.title}</h3>
-              <p class="text-gray-400 text-sm mb-3">${script.game ? `Game: ${script.game.name}` : 'Universal'}</p>
-              <div class="flex justify-between items-center text-gray-400 text-xs mb-3">
-                <span>Views: <span class="font-semibold">${script.views ? script.views.toLocaleString() : 'N/A'}</span></span>
-                <span>Type: <span class="font-semibold">${script.scriptType || 'N/A'}</span></span>
-              </div>
-              <div class="flex gap-2">
-                <button class="view-script-btn flex-1 py-2 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-md transition" data-script-id="${script._id}">View Script</button>
-                <button class="copy-script-btn flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition" data-script-id="${script._id}">Copy Script</button>
-              </div>
-            </div>
-          `;
-          scriptCardsGrid.appendChild(scriptCard);
-        });
-
-        // Add event listeners for new buttons
-        scriptCardsGrid.querySelectorAll('.view-script-btn').forEach(button => {
-          button.addEventListener('click', async (e) => {
-            const scriptId = e.target.dataset.scriptId;
-            const scriptDetails = await fetchScriptDetails(scriptId);
-            if (scriptDetails) {
-              viewScriptTitle.textContent = scriptDetails.title;
-              viewScriptContent.value = scriptDetails.script;
-              viewScriptModal.classList.remove('hidden');
-              void viewScriptModal.offsetWidth;
-              viewScriptModal.classList.add('visible');
-            } else {
-              alert('Failed to load script content.');
-            }
-          });
-        });
-
-        scriptCardsGrid.querySelectorAll('.copy-script-btn').forEach(button => {
-          button.addEventListener('click', async (e) => {
-            const scriptId = e.target.dataset.scriptId;
-            const scriptDetails = await fetchScriptDetails(scriptId);
-            if (scriptDetails && scriptDetails.script) {
-              navigator.clipboard.writeText(scriptDetails.script)
-                .then(() => {
-                  alert('Script copied to clipboard!');
-                })
-                .catch(err => {
-                  console.error('Failed to copy script: ', err);
-                  alert('Failed to copy script.');
-                });
-            } else {
-              alert('Script content not available to copy.');
-            }
-          });
-        });
-
-        renderPagination(totalPages, currentPage);
-      }
-
-      function renderPagination(totalPages, currentPage) {
-        scriptPagination.innerHTML = '';
-        if (totalPages <= 1) return;
-
-        const createPageButton = (page, text, isActive = false, isDisabled = false) => {
-          const button = document.createElement('button');
-          button.className = `px-3 py-1 rounded-md transition ${isActive ? 'bg-gray-700 text-white font-semibold' : 'hover:bg-gray-700'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`;
-          button.textContent = text;
-          button.disabled = isDisabled;
-          if (!isDisabled) {
-            button.addEventListener('click', () => {
-              currentPage = page;
-              if (currentSearchQuery) {
-                searchScripts(currentSearchQuery, currentPage);
-              } else {
-                fetchScripts(currentPage);
-              }
-            });
-          }
-          return button;
-        };
-
-        scriptPagination.appendChild(createPageButton(currentPage - 1, 'Previous', false, currentPage === 1));
-
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, currentPage + 2);
-
-        if (startPage > 1) {
-          scriptPagination.appendChild(createPageButton(1, '1'));
-          if (startPage > 2) {
-            const span = document.createElement('span');
-            span.className = 'px-3 py-1';
-            span.textContent = '...';
-            scriptPagination.appendChild(span);
-          }
-        }
-
-        for (let i = startPage; i <= endPage; i++) {
-          scriptPagination.appendChild(createPageButton(i, i.toString(), i === currentPage));
-        }
-
-        if (endPage < totalPages) {
-          if (endPage < totalPages - 1) {
-            const span = document.createElement('span');
-            span.className = 'px-3 py-1';
-            span.textContent = '...';
-            scriptPagination.appendChild(span);
-          }
-          scriptPagination.appendChild(createPageButton(totalPages, totalPages.toString()));
-        }
-
-        scriptPagination.appendChild(createPageButton(currentPage + 1, 'Next', false, currentPage === totalPages));
-      }
-
-      // Event Listeners for Script Hub
-      scriptSearchInput.addEventListener('input', debounce(() => {
-        currentSearchQuery = scriptSearchInput.value.trim();
-        currentPage = 1; // Reset to first page on new search
-        if (currentSearchQuery) {
-          searchScripts(currentSearchQuery, currentPage);
-        } else {
-          fetchScripts(currentPage);
-        }
-      }, 300)); // Debounce to prevent too many API calls
-
-      scriptFilterButtons.addEventListener('click', (e) => {
-        if (e.target.tagName === 'BUTTON') {
-          currentFilter = e.target.dataset.filter;
-          currentPage = 1; // Reset to first page on new filter
-          // In a real scenario, you'd pass the filter to the API call
-          // For now, we'll just re-fetch all or search based on current query
-          if (currentSearchQuery) {
-            searchScripts(currentSearchQuery, currentPage);
-          } else {
-            fetchScripts(currentPage);
-          }
-
-          // Update active filter button styling
-          scriptFilterButtons.querySelectorAll('button').forEach(btn => {
-            btn.classList.remove('bg-gray-700', 'text-gray-200');
-            btn.classList.add('bg-gray-900', 'text-gray-400');
-          });
-          e.target.classList.remove('bg-gray-900', 'text-gray-400');
-          e.target.classList.add('bg-gray-700', 'text-gray-200');
-        }
-      });
-
-      // View Script Modal Close Button
-      closeViewScriptBtn.addEventListener('click', () => {
-        viewScriptModal.classList.remove('visible');
-        viewScriptModal.addEventListener('transitionend', function handler() {
-          viewScriptModal.classList.add('hidden');
-          viewScriptModal.removeEventListener('transitionend', handler);
-        });
-      });
-
-      // Copy Script Content Button in View Script Modal
-      copyScriptContentBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(viewScriptContent.value)
-          .then(() => {
-            alert('Script copied to clipboard!');
-          })
-          .catch(err => {
-            console.error('Failed to copy script: ', err);
-            alert('Failed to copy script.');
-          });
-      });
-
-      // Utility function for debouncing
-      function debounce(func, delay) {
-        let timeout;
-        return function(...args) {
-          const context = this;
-          clearTimeout(timeout);
-          timeout = setTimeout(() => func.apply(context, args), delay);
-        };
-      }
-
-      // Initial load of scripts when the page loads (if Script Hub is the default view)
-      // Or it will be called when sidebarScriptHubLink is clicked.
-      // loadScripts(); // Removed as showContent handles initial load
     });
   </script>
 </body>
